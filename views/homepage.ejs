@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files Upload</title>
+    <style>
+        :root {
+            /* New color palette - Elegant Purple to Teal gradient theme */
+            --primary-color: #6a5acd;  /* Slate Blue */
+            --primary-light: #f1f0ff;
+            --primary-dark: #5549b1;
+            --accent-color: #00b4d8;   /* Bright Teal */
+            --accent-light: #90e0ef;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --background: #f8f9fa;
+            --card-bg: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-color) 100%);
+            top: -150px;
+            right: -150px;
+            opacity: 0.4;
+            z-index: -1;
+        }
+        
+        body::after {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            bottom: -100px;
+            left: -100px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .upload-container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.07);
+            padding: 45px;
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upload-container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.09);
+        }
+        
+        .upload-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        
+        h1 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 28px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 35px;
+            font-size: 15px;
+            font-weight: 400;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #d8dde6;
+            border-radius: 16px;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(145deg, #ffffff, #f9f9ff);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(145deg, #fbfbff, #f5f5ff);
+        }
+        
+        .file-upload-area::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-light) 0%, transparent 70%);
+            opacity: 0.6;
+            z-index: -1;
+        }
+        
+        .upload-icon {
+            font-size: 65px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: block;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-shadow: 0 5px 15px rgba(106, 90, 205, 0.2);
+        }
+        
+        .file-upload-area:hover .upload-icon {
+            transform: translateY(-5px) scale(1.05);
+            color: var(--accent-color);
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .file-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .file-info i {
+            font-size: 16px;
+            color: var(--accent-color);
+        }
+        
+        #file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+        
+        .submit-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            transition: opacity 0.5s ease;
+            z-index: -1;
+            opacity: 0;
+        }
+        
+        .submit-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .submit-btn:hover {
+            box-shadow: 0 8px 20px rgba(106, 90, 205, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .file-name-container {
+            background: linear-gradient(to right, var(--primary-light), #f8f9ff);
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .file-name {
+            font-size: 14px;
+            color: var(--primary-dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .file-name i {
+            color: var(--success);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .progress-container {
+            margin-top: 25px;
+            display: none;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #edf2f7;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .upload-container {
+                padding: 30px;
+            }
+            
+            .file-upload-area {
+                padding: 30px 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="upload-container">
+        <h1>File Uploader</h1>
+        <p class="subtitle">Upload your documents with ease and style</p>
+        
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="file-upload-area" id="drop-area">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <p class="upload-text">Drag and drop your file here</p>
+                <p class="file-info"><i class="fas fa-info-circle"></i> Supports JPG, PNG, PDF (Max: 5MB)</p>
+                <input type="file" id="file-input" name="profileImage" />
+            </div>
+            
+            <div class="file-name-container" id="file-name-container">
+                <p class="file-name" id="file-name-display"></p>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="upload-btn">
+                <i class="fas fa-upload"></i> Upload File
+            </button>
+            
+            <div class="progress-container" id="progress-container">
+                <div class="progress-label">
+                    <span>Uploading...</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Display selected filename
+        document.getElementById('file-input').addEventListener('change', function() {
+            const fileName = this.files[0]?.name;
+            const fileNameContainer = document.getElementById('file-name-container');
+            const fileDisplay = document.getElementById('file-name-display');
+            
+            if (fileName) {
+                fileDisplay.innerHTML = '<i class="fas fa-check-circle"></i> ' + fileName;
+                fileNameContainer.style.display = 'block';
+                
+                // Update button text
+                document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Upload Selected File';
+            } else {
+                fileNameContainer.style.display = 'none';
+            }
+        });
+        
+        // Simulated upload progress for demo purposes
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!document.getElementById('file-input').files[0]) return;
+            
+            e.preventDefault();
+            
+            const progressContainer = document.getElementById('progress-container');
+            const progress = document.getElementById('progress');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const uploadBtn = document.getElementById('upload-btn');
+            
+            progressContainer.style.display = 'block';
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            
+            let width = 0;
+            const interval = setInterval(function() {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    uploadBtn.innerHTML = '<i class="fas fa-check-circle"></i> Upload Complete!';
+                    uploadBtn.style.background = 'linear-gradient(45deg, #10b981, #059669)';
+                    
+                    // Submit the form after the animation completes
+                    setTimeout(() => {
+                        document.querySelector('form').submit();
+                    }, 1000);
+                } else {
+                    width += 5;
+                    progress.style.width = width + '%';
+                    progressPercentage.textContent = width + '%';
+                }
+            }, 100);
+        });
+        
+        // Drag and drop functionality
+        const dropArea = document.getElementById('drop-area');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.style.borderColor = '#6a5acd';
+            dropArea.style.backgroundColor = '#f5f5ff';
+            dropArea.querySelector('.upload-icon').style.transform = 'scale(1.1)';
+        }
+        
+        function unhighlight() {
+            dropArea.style.borderColor = '#d8dde6';
+            dropArea.style.backgroundColor = '';
+            dropArea.querySelector('.upload-icon').style.transform = 'scale(1)';
+        }
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('file-input').files = files;
+            
+            // Trigger the change event manually
+            const event = new Event('change');
+            document.getElementById('file-input').dispatchEvent(event);
+        }
+    </script>
+</body>
+</html>
